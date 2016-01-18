@@ -1,0 +1,6 @@
+framework module Pods_FlickFirst {
+  umbrella header "Pods-FlickFirst-umbrella.h"
+
+  export *
+  module * { export * }
+}
