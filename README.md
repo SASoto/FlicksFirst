@@ -28,7 +28,7 @@ The following **additional** features are implemented:
 ## Video Walkthrough 
 
 Here's a walkthrough of implemented user stories:
-![licecap demo animation](/docs/FlicksFirstGif1.gif)
+![FlicksFirst demo animation](/docs/FlicksFirstGif1.gif)
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
