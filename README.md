@@ -29,7 +29,7 @@ The following **additional** features are implemented:
 
 Here's a walkthrough of implemented user stories:
 
-<FlicksFirstGif1.gif>
+[FlicksFirstGif1.gif]
 
 GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
