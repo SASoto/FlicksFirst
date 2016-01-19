@@ -35,6 +35,7 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 ## Notes
 
 Describe any challenges encountered while building the app.
+
 Familiarizing myself with CocoaPods and their installation process.
 Familiarizing myself with Terminal and its different functionalities.
 Organizing/parsing certain blocks of code like the function/method loadDataFromNetwork.
