@@ -19,20 +19,6 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
     
     var isMoreDataLoading = false
     var loadingMoreView:InfiniteScrollActivityView?
-
-    /*func delay(delay:Double, closure:()->())
-    {
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC))),
-        dispatch_get_main_queue(), closure)
-    }
-    
-    func onRefresh()
-    {
-        delay(2, closure:
-                {self.refreshControl.endRefreshing()
-                }
-             )
-    }*/
     
     var movies: [NSDictionary]?
     
@@ -92,7 +78,7 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
         
         task.resume()
     
-        func loadDataFromNetwork()
+        /*func loadDataFromNetwork() /*---x*/
         {
             MBProgressHUD.showHUDAddedTo(self.view, animated: true)
             
@@ -104,7 +90,9 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
                 });
             
             task.resume()
-        }
+        }*/
+        
+        loadDataFromNetwork(session, request: request) /*---*/
         
         let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
         loadingMoreView = InfiniteScrollActivityView(frame: frame)
@@ -177,6 +165,20 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
         return cell
     }
     
+    func loadDataFromNetwork(session: NSURLSession!, request: NSURLRequest!) /*---*/
+    {
+        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        
+        let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
+            {
+                (data, response, error) in
+                
+                MBProgressHUD.hideHUDForView(self.view, animated: true)
+        });
+        
+        task.resume()
+    }
+    
     /*func loadMoreData()
     {
         self.isMoreDataLoading = false
@@ -225,11 +227,59 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
     
     func refreshControlAction(refreshControl: UIRefreshControl)
     {
-        self.tableView.reloadData()
+        tableView.reloadData()
         refreshControl.endRefreshing()
-        let language = "Swift"
-        print("Learning\(language)")
     }
+        /*let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let request = NSURLRequest(URL: url!)
+        let session = NSURLSession(
+            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
+            delegate:nil,
+            delegateQueue:NSOperationQueue.mainQueue()
+        )
+        
+        let task : NSURLSessionDataTask = session.dataTaskWithRequest(request,
+            completionHandler:
+            {
+                (dataOrNil, response, error) in
+                if let data = dataOrNil
+                {
+                    if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
+                        data, options:[]) as? NSDictionary
+                    {
+                        NSLog("response: \(responseDictionary)")
+                        
+                        self.movies = responseDictionary["results"] as? [NSDictionary]
+                        
+                        self.tableView.reloadData()
+                        refreshControl.endRefreshing()
+                        
+                        
+                    }
+                }
+            });
+        
+        task.resume()*/
+        
+        /*self.tableView.reloadData()
+        refreshControl.endRefreshing()*/
+        /*let language = "Swift"
+        print("Learning\(language)")*/
+        
+        /*func loadDataFromNetwork()
+        {
+            MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+            
+            let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
+                {
+                    (data, response, error) in
+                    
+                    MBProgressHUD.hideHUDForView(self.view, animated: true)
+                });
+            
+            task.resume()
+        }*/
     
     /*let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
     loadingMoreView = InfiniteScrollActivityView(frame: frame)
@@ -256,6 +306,7 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
 
 class InfiniteScrollActivityView: UIView
 {
+    
     var activityIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView()
     static let defaultHeight:CGFloat = 60.0
     
@@ -295,4 +346,5 @@ class InfiniteScrollActivityView: UIView
         self.hidden = false
         self.activityIndicatorView.startAnimating()
     }
+        
 }
