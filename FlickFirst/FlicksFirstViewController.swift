@@ -169,7 +169,7 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
     {
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         
-        let task : NSURLSessionDataTask = Session.dataTaskWithRequest(request, completionHandler:
+        let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
             { (data, response, error) in
             
             MBProgressHUD.hideHUDForView(self.view, animated: true)
