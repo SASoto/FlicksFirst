@@ -12,43 +12,56 @@ import MBProgressHUD
 
 class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITableViewDelegate, UIScrollViewDelegate
 {
-    
-    //var refreshControl: UIRefreshControl!
-    
     @IBOutlet weak var tableView: UITableView!
     
+    var selectedBackgroundView: UIView?
+    
     var isMoreDataLoading = false
-    var loadingMoreView:InfiniteScrollActivityView?
     
     var movies: [NSDictionary]?
+    var endpoint: String!
+    var filteredData: [String]!
     
     override func viewDidLoad()
     {
         super.viewDidLoad()
+
+        let titleLabel = UILabel()
         
+        let shadow = NSShadow()
+        shadow.shadowColor = UIColor.grayColor().colorWithAlphaComponent(0.5)
+        shadow.shadowOffset = CGSizeMake(2,2);
+        shadow.shadowBlurRadius = 4;
+            
+        let titleText = NSAttributedString(string: "Flicks", attributes: [
+                NSFontAttributeName : UIFont.boldSystemFontOfSize(25),
+                NSForegroundColorAttributeName : UIColor(red: 0.97, green: 0.02, blue: 0.27, alpha: 0.8),
+                NSShadowAttributeName : shadow
+                ])
+            
+        titleLabel.attributedText = titleText
+        titleLabel.sizeToFit()
+        navigationItem.titleView = titleLabel
+        
+        self.navigationItem.title = "Back"
+        if let navigationBar = navigationController?.navigationBar
+        {
+            navigationBar.tintColor = UIColor(red: 0.97, green: 0.02, blue: 0.27, alpha: 0.8)
+        }
+
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: "refreshControlAction:", forControlEvents: UIControlEvents.ValueChanged)
         tableView.insertSubview(refreshControl, atIndex: 0)
         
-        /*func refreshControlAction(refreshControl: UIRefreshControl)
-        {
-            self.tableView.reloadData()
-            refreshControl.endRefreshing()
-        }*/
-        
         var scrollView: UIScrollView!
         
-        /*refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: "onRefresh", forControlEvents: UIControlEvents.ValueChanged)
-        scrollView?.insertSubview(refreshControl, atIndex: 0)
-        */
         tableView.dataSource = self
         tableView.delegate = self
         
         // Do any additional setup after loading the view.
     
         let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
+        let url = NSURL(string:"https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
         let request = NSURLRequest(URL: url!)
         let session = NSURLSession(
             configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
@@ -69,48 +82,18 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
                             
                             self.movies = responseDictionary["results"] as? [NSDictionary]
                             
-                            self.tableView.reloadData()
+                            //self.tableView.reloadData()
                         
                             
                     }
                 }
+                
+                self.tableView.reloadData()
             });
         
         task.resume()
-    
-        /*func loadDataFromNetwork() /*---x*/
-        {
-            MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-            
-            let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
-                {
-                    (data, response, error) in
-                    
-                    MBProgressHUD.hideHUDForView(self.view, animated: true)
-                });
-            
-            task.resume()
-        }*/
         
         loadDataFromNetwork(session, request: request) /*---*/
-        
-        let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
-        loadingMoreView = InfiniteScrollActivityView(frame: frame)
-        loadingMoreView!.hidden = true
-        tableView.addSubview(loadingMoreView!)
-        
-        var insets = tableView.contentInset;
-        insets.bottom += InfiniteScrollActivityView.defaultHeight;
-        tableView.contentInset = insets
-        
-        /*func loadMoreData()
-        {
-            self.isMoreDataLoading = false
-            self.loadingMoreView!.stopAnimating()
-            
-            self.data = data
-            self.tableView.reloadData()
-        }*/
     
     }
 
@@ -139,13 +122,17 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
     {
         let cell = tableView.dequeueReusableCellWithIdentifier("FlicksFirstCell", forIndexPath: indexPath) as! MovieCell
         
+        let backgroundView = UIView()
+        backgroundView.backgroundColor = UIColor.whiteColor()
+        cell.selectedBackgroundView = backgroundView
+        
         let movie = movies![indexPath.row]
         let title = movie["title"] as! String
         let overview = movie["overview"] as! String
-        //let posterPath = movie["poster_path"] as! String
+        let baseUrl = "http://image.tmdb.org/t/p/w500"
+        
         if let posterPath = movie["poster_path"] as? String
         {
-            let baseUrl = "http://image.tmdb.org/t/p/w500"
             let imageUrl = NSURL(string:baseUrl + posterPath)
             cell.posterView.setImageWithURL(imageUrl!)
         }
@@ -154,17 +141,44 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
             cell.posterView.image = nil
         }
         
-        //let baseUrl = "http://image.tmdb.org/t/p/w500"
-        //let imageUrl = NSURL(string:baseUrl + posterPath)
-        
         cell.titleLabel.text = title
         cell.overviewLabel.text = overview
-        //cell.posterView.setImageWithURL(imageUrl!)
-        
+
         print("row \(indexPath.row)")
         return cell
     }
     
+    func refreshControlAction(refreshControl: UIRefreshControl)
+    {
+        let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
+        let url2 = NSURL(string:"https://api.themoviedb.org/3/movie/\(endpoint)?api_key=\(apiKey)")
+        let myRequest = NSURLRequest(URL: url2!)
+        let session = NSURLSession(
+            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
+            delegate:nil,
+            delegateQueue:NSOperationQueue.mainQueue()
+        )
+        
+        let task: NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
+            completionHandler:
+            {
+                (data, response, error) in
+                if let data = data
+                {
+                    if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
+                        data, options:[]) as? NSDictionary {
+                            self.movies = responseDictionary["results"] as! [NSDictionary]
+                            self.tableView.reloadData()
+                            refreshControl.endRefreshing()
+                    }
+                    
+                }
+                
+        });
+        task.resume()
+        
+    }
+
     func loadDataFromNetwork(session: NSURLSession!, request: NSURLRequest!) /*---*/
     {
         MBProgressHUD.showHUDAddedTo(self.view, animated: true)
@@ -174,177 +188,23 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
                 (data, response, error) in
                 
                 MBProgressHUD.hideHUDForView(self.view, animated: true)
-        });
-        
-        task.resume()
-    }
-    
-    /*func loadMoreData()
-    {
-        self.isMoreDataLoading = false
-        self.loadingMoreView!.stopAnimating()
-        
-        self.data = data
-        self.tableView.reloadData()
-    }*/
-    
-    /*func loadDataFromNetwork()
-    {
-        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-        
-        let task : NSURLSessionDataTask = mySession.dataTaskWithRequest(request, completionHandler:
-            { (data, response, error) in
-            
-            MBProgressHUD.hideHUDForView(self.view, animated: true)
-        });
-        
-        task.resume()
-    }*/
-    
-    //var isMoreDataLoading = false
-    //var loadingMoreView:InfiniteScrollActivityView?
-    
-    func scrollViewDidScroll(scrollView: UIScrollView)
-    {
-        if (!isMoreDataLoading)
-        {
-            let scrollViewContentHeight = tableView.contentSize.height
-            let scrollOffsetThreshold = scrollViewContentHeight; -tableView.bounds.size.height
-            
-            if(scrollView.contentOffset.y > scrollOffsetThreshold && tableView.dragging)
-            {
-                isMoreDataLoading = true
-                
-                let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
-                loadingMoreView?.frame = frame
-                loadingMoreView!.startAnimating()
-                
-                //loadMoreData()
-            }
-            
-        }
-    }
-    
-    func refreshControlAction(refreshControl: UIRefreshControl)
-    {
-        tableView.reloadData()
-        refreshControl.endRefreshing()
-    }
-        /*let apiKey = "a07e22bc18f5cb106bfe4cc1f83ad8ed"
-        let url = NSURL(string:"https://api.themoviedb.org/3/movie/now_playing?api_key=\(apiKey)")
-        let request = NSURLRequest(URL: url!)
-        let session = NSURLSession(
-            configuration: NSURLSessionConfiguration.defaultSessionConfiguration(),
-            delegate:nil,
-            delegateQueue:NSOperationQueue.mainQueue()
-        )
-        
-        let task : NSURLSessionDataTask = session.dataTaskWithRequest(request,
-            completionHandler:
-            {
-                (dataOrNil, response, error) in
-                if let data = dataOrNil
-                {
-                    if let responseDictionary = try! NSJSONSerialization.JSONObjectWithData(
-                        data, options:[]) as? NSDictionary
-                    {
-                        NSLog("response: \(responseDictionary)")
-                        
-                        self.movies = responseDictionary["results"] as? [NSDictionary]
-                        
-                        self.tableView.reloadData()
-                        refreshControl.endRefreshing()
-                        
-                        
-                    }
-                }
             });
-        
-        task.resume()*/
-        
-        /*self.tableView.reloadData()
-        refreshControl.endRefreshing()*/
-        /*let language = "Swift"
-        print("Learning\(language)")*/
-        
-        /*func loadDataFromNetwork()
-        {
-            MBProgressHUD.showHUDAddedTo(self.view, animated: true)
-            
-            let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
-                {
-                    (data, response, error) in
-                    
-                    MBProgressHUD.hideHUDForView(self.view, animated: true)
-                });
-            
-            task.resume()
-        }*/
+        task.resume()
+    }
     
-    /*let frame = CGRectMake(0, tableView.contentSize.height, tableView.bounds.size.width, InfiniteScrollActivityView.defaultHeight)
-    loadingMoreView = InfiniteScrollActivityView(frame: frame)
-    loadingMoreView!.hidden = true
-    tableView.addSubview(loadingMoreView!)
-    
-    var insets = tableView.contentInset;
-    insets.bottom += InfiniteScrollActivityView.defaultHeight;
-    tableView.contentInset = insets*/
-    
-    //var isMoreDataLoading = false
-    
-    /*
     // MARK: - Navigation
 
     // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?)
+    {
+        let cell = sender as! UITableViewCell
+        let indexPath = tableView.indexPathForCell(cell)
+        let movie = movies![indexPath!.row]
+        
+        let detailViewController = segue.destinationViewController as! DetailViewController
+        detailViewController.movie = movie
+    }
         // Get the new view controller using segue.destinationViewController.
         // Pass the selected object to the new view controller.
-    }
-    */
 
-}
-
-class InfiniteScrollActivityView: UIView
-{
-    
-    var activityIndicatorView: UIActivityIndicatorView = UIActivityIndicatorView()
-    static let defaultHeight:CGFloat = 60.0
-    
-    required init?(coder aDecoder: NSCoder)
-    {
-        super.init(coder: aDecoder)
-        setupActivityIndicator()
-    }
-    
-    override init(frame aRect: CGRect)
-    {
-        super.init(frame: aRect)
-        setupActivityIndicator()
-    }
-    
-    override func layoutSubviews()
-    {
-        super.layoutSubviews()
-        activityIndicatorView.center = CGPointMake(self.bounds.size.width/2, self.bounds.size.height/2)
-    }
-    
-    func setupActivityIndicator()
-    {
-        activityIndicatorView.activityIndicatorViewStyle = .Gray
-        activityIndicatorView.hidesWhenStopped = true
-        self.addSubview(activityIndicatorView)
-    }
-    
-    func stopAnimating()
-    {
-        self.activityIndicatorView.stopAnimating()
-        self.hidden = true
-    }
-    
-    func startAnimating()
-    {
-        self.hidden = false
-        self.activityIndicatorView.startAnimating()
-    }
-        
 }
