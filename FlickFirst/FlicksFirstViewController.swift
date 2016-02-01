@@ -181,6 +181,7 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
         });
         task.resume()
         
+    })
     }
 
     func loadDataFromNetwork(session: NSURLSession!, request: NSURLRequest!) /*---*/
