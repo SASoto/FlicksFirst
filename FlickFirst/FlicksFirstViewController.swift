@@ -159,7 +159,6 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
             delegateQueue:NSOperationQueue.mainQueue()
         )
         
-<<<<<<< HEAD
         let task: NSURLSessionDataTask = session.dataTaskWithRequest(myRequest,
             completionHandler:
             {
@@ -175,12 +174,10 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
                     
                 }
                 
-=======
         let task : NSURLSessionDataTask = session.dataTaskWithRequest(request, completionHandler:
             { (data, response, error) in
             
             MBProgressHUD.hideHUDForView(self.view, animated: true)
->>>>>>> a29d2b2eb9fc7adda3ff8a748fcd579f4de77d1d
         });
         task.resume()
         
