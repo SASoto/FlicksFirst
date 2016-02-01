@@ -96,6 +96,9 @@ GIF created with [LiceCap](http://www.cockos.com/licecap/).
 
 Describe any challenges encountered while building the app.
 
+Figuring out how to customize the navigation bar.
+Including an image for the now playing and top rated buttons. I was unsuccessful in doing so.
+
 ## License
 
     Copyright [2016] [Saul Soto]
