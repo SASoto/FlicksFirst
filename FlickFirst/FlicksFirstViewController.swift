@@ -174,14 +174,9 @@ class FlicksFirstViewController: UIViewController, UITableViewDataSource, UITabl
                     
                 }
                 
-        let task : NSURLSessionDataTask = session.dataTaskWithRequest(myRequest, completionHandler:
-            { (data, response, error) in
-            
-            MBProgressHUD.hideHUDForView(self.view, animated: true)
         });
         task.resume()
         
-    })
     }
 
     func loadDataFromNetwork(session: NSURLSession!, request: NSURLRequest!) /*---*/
